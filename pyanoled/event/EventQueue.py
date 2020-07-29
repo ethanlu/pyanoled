@@ -1,8 +1,8 @@
-from pyanoled.event.Event import Event
+from pyanoled.event.Events import Event
 
 from collections import deque
 from threading import Lock
-from typing import List
+from typing import List, Type
 
 
 class EventQueue(object):
@@ -13,7 +13,7 @@ class EventQueue(object):
         self._events = deque([])
         self._lock = Lock()
 
-    def pop_event(self, n: int = 1) -> List[Event]:
+    def pop_event(self, n: int = 1) -> List[Type[Event]]:
         """
         pops off n Events from the event queue and returns in a list
         :param n: number of events to remove from the event queue, if less than n events exist then all events removed
@@ -25,7 +25,7 @@ class EventQueue(object):
 
         return events
 
-    def push_event(self, events: List[Event]) -> bool:
+    def push_event(self, events: List[Type[Event]]) -> bool:
         """
         pushes given list of Events objects to event queue
         :param events:

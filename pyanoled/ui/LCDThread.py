@@ -1,10 +1,7 @@
 from pyanoled.event.EventQueue import EventQueue
 
-from random import randint
 from logging import Logger
 from pyhocon import ConfigTree
-
-import time
 
 
 class LCDThread(object):
@@ -17,7 +14,5 @@ class LCDThread(object):
 
     def run(self):
         self._l.info('starting lcd user interface...')
-        for i in range(10):
-            self._l.info('lcd screen #{i}'.format(i=str(i)))
-            time.sleep(randint(1, 10000)/1000)
+
         self._l.info('ending lcd user interface...')
