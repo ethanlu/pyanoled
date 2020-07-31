@@ -23,9 +23,15 @@ class Event(object):
 class KeyEvent(Event):
     """
     event representing key presses
-    {'type': 'note_on', 'time': 0, 'note': 60, 'velocity': 63, 'channel': 0}
-    {'type': 'note_on', 'time': 0, 'note': 64, 'velocity': 0, 'channel': 0}
+    example:
+        {'type': 'note_on', 'time': 0, 'note': 21, 'velocity': 0, 'channel': 0}
+        {'type': 'note_on', 'time': 0, 'note': 60, 'velocity': 0, 'channel': 0}
+        {'type': 'note_on', 'time': 0, 'note': 108, 'velocity': 0, 'channel': 0}
     """
+
+    MIN_NOTE = 21
+    MAX_NOTE = 108
+
     @property
     def note(self):
         # note 60 is middle c
@@ -37,15 +43,20 @@ class KeyEvent(Event):
 
     @property
     def is_pressed(self):
+        # value of 0 is not pressed
         return self._msg.velocity > 0
 
 
 class PedalEvent(Event):
     """
     event representing dampner/soft pedal press
+    example:
         {'type': 'control_change', 'time': 0, 'control': 64, 'value': 127, 'channel': 0}
         {'type': 'control_change', 'time': 0, 'control': 64, 'value': 0, 'channel': 0}
     """
+
+    PEDAL_VAL = 64
+
     @property
     def is_pressed(self):
         # value of 0 is not pressed

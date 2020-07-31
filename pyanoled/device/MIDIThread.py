@@ -25,10 +25,10 @@ class MIDIThread(object):
             # listen on input port for messages and extract out the pertinent ones
             pending = []
             for m in self._input_port.iter_pending():
-                if m.type == 'note_on':
+                if m.type == 'note_on' and KeyEvent.MIN_NOTE <= m.note <= KeyEvent.MAX_NOTE:
                     self._l.info('key event : {s}'.format(s=str(vars(m))))
                     pending.append(KeyEvent(m))
-                elif m.type == 'control_change' and m.control == 64:
+                elif m.type == 'control_change' and m.control == PedalEvent.PEDAL_VAL:
                     self._l.info('pedal event : {s}'.format(s=str(vars(m))))
                     pending.append(PedalEvent(m))
 
