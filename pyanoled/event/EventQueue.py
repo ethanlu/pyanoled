@@ -21,7 +21,7 @@ class EventQueue(object):
         """
         # lock the event queue to ensure nothing is writing to it while reading
         with self._lock:
-            events = [self._events.popleft() for i in range(max(n, len(self._events)))]
+            events = [self._events.popleft() for i in range(min(n, len(self._events)))]
 
         return events
 

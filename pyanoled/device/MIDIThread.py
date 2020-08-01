@@ -41,5 +41,6 @@ class MIDIThread(object):
                     pending.append(PedalEvent(m))
 
             # append events to queue...rinse and repeat
-            self._event_queue.push_event(pending)
+            if len(pending):
+                self._event_queue.push_event(pending)
         self._l.info('ending midi listener...')

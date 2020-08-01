@@ -31,7 +31,7 @@ class PyanoLED(object):
 
 
 if __name__ == "__main__":
-    c = ConfigFactory.parse_file('/opt/app/conf/common.conf')
+    c = ConfigFactory.parse_file('/opt/app/conf/app.conf')
     config.dictConfig(c['log'])
 
     app = PyanoLED(getLogger('pyanoled'), c)
