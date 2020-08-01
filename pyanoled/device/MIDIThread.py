@@ -19,6 +19,14 @@ class MIDIThread(object):
         self._input_port = mido.open_input([s for s in mido.get_input_names() if s.startswith(self._c['input_port_prefix'])][0])
 
     def run(self):
+        """
+        main thread for reading piano events from midi port. continuously listens on the input midi port for messages
+        and:
+        - filters out the pertinent events
+        - converts to event instances
+        - adds to event queue
+        :return:
+        """
         self._l.info('starting midi listener...')
 
         while True:
