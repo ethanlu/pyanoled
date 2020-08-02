@@ -4,7 +4,7 @@ from logging import Logger
 from pyhocon import ConfigTree
 
 
-class LCDThread(object):
+class LCDApp(object):
     def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
         self._l = l
         self._c = c

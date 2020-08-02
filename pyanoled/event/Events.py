@@ -37,6 +37,12 @@ class KeyEvent(Event):
         # note 60 is middle c
         return self._msg.note
 
+    @property
+    def normalized_note(self):
+        # return note normalized to 0 for lowest key
+        return self._msg.note - self.MIN_NOTE
+
+    @property
     def intensity(self):
         # velocity measures how hard the key was pressed, 0 means not pressed
         return self._msg.velocity

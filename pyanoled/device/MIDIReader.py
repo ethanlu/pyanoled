@@ -7,7 +7,7 @@ from pyhocon import ConfigTree
 import mido
 
 
-class MIDIThread(object):
+class MIDIReader(object):
     def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
         self._l = l
         self._c = c

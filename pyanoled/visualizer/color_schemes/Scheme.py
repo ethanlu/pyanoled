@@ -2,7 +2,7 @@ from pyanoled.event.Events import KeyEvent
 
 from abc import ABC, abstractmethod
 from logging import Logger
-from rpi_ws281x.rpi_ws281x import Color
+from typing import Tuple
 
 class Scheme(ABC):
     """
@@ -16,7 +16,7 @@ class Scheme(ABC):
         self._l = l
 
     @abstractmethod
-    def getColor(self, key: KeyEvent) -> Color:
+    def getColor(self, key: KeyEvent) -> Tuple:
         """
         based on its color scheme design and given key event, generate the appropriate color instance
         :param key: KeyEvent instance
