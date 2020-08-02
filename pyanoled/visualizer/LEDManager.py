@@ -19,7 +19,7 @@ class LEDManager(object):
         self._event_queue = event_queue
         self._pedal_on = False
         self._led_states = [FadingState(i, (0, 0, 0)) for i in range(88)]
-        self._color_scheme = self._get_color_scheme(self._c['color_schemes'])
+        self._color_scheme = self._get_color_scheme(self._c['color_scheme'])
 
         self._l.info('initializing led visualizer...')
 
@@ -84,8 +84,20 @@ class LEDManager(object):
             # brightness is always highest
             return color
         else:
-            # velocity of 127 is high brightness. conver to percent and apply it to each rgb color
-            return tuple(map(lambda c: int(math.floor(c * (event.velocity / 127))), color))
+            # velocity of 127 is high brightness and 0 is no brightness. to make led brightness difference more
+            # noticeable, group the velocity into:
+            # soft press : brightness reduced by 90%
+            # normal press : brightness reduced by 50%
+            # hard press : brightness at 100%
+            if event.intensity <= self._c['keypress_soft_velocity']:
+                # soft press
+                return tuple(map(lambda c: int(math.floor(c * .10)), color))
+            if self._c['keypress_soft_velocity'] < event.intensity < self._c['keypress_hard_velocity']:
+                # normal press
+                return tuple(map(lambda c: int(math.floor(c * .50)), color))
+            else:
+                # hard press
+                return color
 
     def run(self):
         """
@@ -109,7 +121,7 @@ class LEDManager(object):
                     led_index = self._calculate_led_index(event)
                     if event.is_pressed:
                         self._l.info('lighting up led {l} for note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._pixelstrip.setPixelColor(led_index, Color(*self._adjust_brightness(self._color_scheme.getColor(event))))
+                        self._pixelstrip.setPixelColor(led_index, Color(*self._adjust_brightness(event, self._color_scheme.getColor(event))))
                     else:
                         self._l.info('shutting down led {l}'.format(l=led_index))
                         self._pixelstrip.setPixelColor(led_index, Color(0, 0, 0))
