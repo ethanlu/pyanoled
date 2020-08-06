@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Tuple
+from typing import Type, Tuple
 
 
 class State(ABC):
@@ -18,8 +18,10 @@ class State(ABC):
     def color(self):
         return self._color
 
-
 class OnState(State):
+    pass
+
+class HeldState(State):
     pass
 
 class OffState(State):

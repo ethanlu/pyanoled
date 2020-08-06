@@ -1,7 +1,7 @@
 from pyanoled.event.EventQueue import EventQueue
 from pyanoled.event.Events import KeyEvent, PedalEvent
 from pyanoled.visualizer.color_schemes.Scheme import Scheme
-from pyanoled.visualizer.States import OnState, OffState, FadingState
+from pyanoled.visualizer.States import OnState, OffState, HeldState
 
 from logging import Logger
 from pyhocon import ConfigTree
@@ -17,8 +17,8 @@ class LEDManager(object):
         self._l = l
         self._c = c
         self._event_queue = event_queue
-        self._pedal_on = False
-        self._led_states = [FadingState(i, (0, 0, 0)) for i in range(88)]
+        self._pedal = False
+        self._led_states = [None for i in range(88)]
         self._color_scheme = self._get_color_scheme(self._c['color_scheme'])
 
         self._l.info('initializing led visualizer...')
@@ -91,10 +91,10 @@ class LEDManager(object):
             # hard press : brightness at 100%
             if event.intensity <= self._c['keypress_soft_velocity']:
                 # soft press
-                return tuple(map(lambda c: int(math.floor(c * .10)), color))
+                return tuple(map(lambda c: int(math.floor(c * self._c['keypress_soft_multiplier'])), color))
             if self._c['keypress_soft_velocity'] < event.intensity < self._c['keypress_hard_velocity']:
                 # normal press
-                return tuple(map(lambda c: int(math.floor(c * .50)), color))
+                return tuple(map(lambda c: int(math.floor(c * self._c['keypress_normal_multiplier'])), color))
             else:
                 # hard press
                 return color
@@ -114,17 +114,37 @@ class LEDManager(object):
                 self._l.info('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
 
                 if isinstance(event, PedalEvent):
-                    self._pedal_on = event.is_pressed
+                    self._pedal = event.is_pressed
+
+                    if not self._pedal:
+                        # pedal is lifted, so convert any led that was in held state to off state
+                        for i in range(len(self._led_states)):
+                            if isinstance(self._led_states[i], HeldState):
+                                self._led_states[i] = OffState(self._led_states[i].led_index, self._led_states[i].color)
 
                 if isinstance(event, KeyEvent):
                     # translate the note number to led number
                     led_index = self._calculate_led_index(event)
                     if event.is_pressed:
                         self._l.info('lighting up led {l} for note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._pixelstrip.setPixelColor(led_index, Color(*self._adjust_brightness(event, self._color_scheme.getColor(event))))
+                        self._led_states[i] = OnState(led_index, self._adjust_brightness(event, self._color_scheme.getColor(event)))
                     else:
-                        self._l.info('shutting down led {l}'.format(l=led_index))
-                        self._pixelstrip.setPixelColor(led_index, Color(0, 0, 0))
+                        if self._pedal and isinstance(self._led_states[i], OnState):
+                            # pedal is pressed so keep led on as held state
+                            self._l.info('holding led {l}'.format(l=led_index))
+                            self._led_states[i] = HeldState(led_index, self._led_states[i].color)
+                        else:
+                            self._l.info('shutting down led {l}'.format(l=led_index))
+                            self._led_states[i] = OffState(led_index, (0, 0, 0))
+
+            # self._pixelstrip.setPixelColor(led_index, Color(*self._adjust_brightness(event, self._color_scheme.getColor(event))))
+            for i in range(len(self._led_states)):
+                if self._led_states[i] is None:
+                    continue
+                else:
+                    self._pixelstrip.setPixelColor(self._led_states[i].led_index, Color(*self._led_states[i].color))
+                    if isinstance(self._led_states[i], OffState):
+                        self._led_states[i] = None
 
             self._pixelstrip.show()
 
