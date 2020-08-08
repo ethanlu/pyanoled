@@ -2,7 +2,6 @@ from pyanoled.event.EventQueue import EventQueue
 from pyanoled.event.Events import KeyEvent, PedalEvent
 from pyanoled.visualizer.color_schemes.Scheme import Scheme
 from pyanoled.visualizer.effects.Effect import Effect
-from pyanoled.visualizer.States import OnState, OffState, HeldState
 
 from logging import Logger
 from pyhocon import ConfigTree
@@ -21,21 +20,21 @@ class LEDManager(object):
 
         self._l.info('initializing led visualizer...')
         self._pixelstrip = PixelStrip(
-            self._c['count'],
-            self._c['gpio_pin'],
-            freq_hz=self._c['frequency'],
-            dma=self._c['dma'],
-            invert=self._c['invert'],
-            brightness=self._c['brightness'],
-            channel=self._c['channel']
+            self._c['strip.count'],
+            self._c['strip.gpio_pin'],
+            freq_hz=self._c['strip.frequency'],
+            dma=self._c['strip.dma'],
+            invert=self._c['strip.invert'],
+            brightness=self._c['strip.brightness'],
+            channel=self._c['strip.channel']
         )
         self._pixelstrip.begin()
 
         self._l.info('loading color scheme...')
-        self._color_scheme = self._get_color_scheme(self._c['color_scheme'])
+        self._color_scheme = self._get_color_scheme(self._c['color_scheme.value'])
 
         self._l.info('loading effect...')
-        self._effect = self._get_effect(self._c['led_effect'])
+        self._effect = self._get_effect(self._c['led_effect.value'])
         self._effect.set_pixelstrip(self._pixelstrip)
 
     def _get_color_scheme(self, scheme: str) -> Type[Scheme]:
@@ -46,12 +45,12 @@ class LEDManager(object):
             self._l.info('loading {s} color scheme...'.format(s=name))
             module = importlib.import_module('pyanoled.visualizer.color_schemes.{s}'.format(s=name))
         except ImportError as e:
-            self._l.info('invalid color scheme [{s}]. using default color scheme!'.format(s=scheme))
+            self._l.warning('invalid color scheme [{s}]. using default color scheme!'.format(s=scheme))
             name = 'MonoScheme'
             module = importlib.import_module('pyanoled.visualizer.color_schemes.{s}'.format(s=name))
 
         clss = getattr(module, name)
-        return clss(self._l)
+        return clss(self._l, self._c['color_scheme'])
 
     def _get_effect(self, effect: str) -> Type[Effect]:
         try:
@@ -61,12 +60,12 @@ class LEDManager(object):
             self._l.info('loading {s} effect...'.format(s=name))
             module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
         except ImportError as e:
-            self._l.info('invalid effect [{s}]. using default effect!'.format(s=effect))
+            self._l.warning('invalid effect [{s}]. using default effect!'.format(s=effect))
             name = 'LightEffect'
             module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
 
         clss = getattr(module, name)
-        return clss(self._l)
+        return clss(self._l, self._c['led_effect'])
 
     def _calculate_led_index(self, event: KeyEvent) -> int:
         """
@@ -99,7 +98,7 @@ class LEDManager(object):
         :param event: note key event
         :return: brightness percentage
         """
-        if self._c['force_brightness']:
+        if self._c['brightness.force_brightness']:
             # brightness is always highest
             return color
         else:
@@ -108,12 +107,12 @@ class LEDManager(object):
             # soft press : brightness reduced by 90%
             # normal press : brightness reduced by 50%
             # hard press : brightness at 100%
-            if event.intensity <= self._c['keypress_soft_velocity']:
+            if event.intensity <= self._c['brightness.keypress_soft_velocity']:
                 # soft press
-                return tuple(map(lambda c: int(math.floor(c * self._c['keypress_soft_multiplier'])), color))
-            if self._c['keypress_soft_velocity'] < event.intensity < self._c['keypress_hard_velocity']:
+                return tuple(map(lambda c: int(math.floor(c * self._c['brightness.keypress_soft_multiplier'])), color))
+            if self._c['brightness.keypress_soft_velocity'] < event.intensity < self._c['brightness.keypress_hard_velocity']:
                 # normal press
-                return tuple(map(lambda c: int(math.floor(c * self._c['keypress_normal_multiplier'])), color))
+                return tuple(map(lambda c: int(math.floor(c * self._c['brightness.keypress_normal_multiplier'])), color))
             else:
                 # hard press
                 return color
@@ -129,11 +128,10 @@ class LEDManager(object):
         self._l.info('starting led visualizer...')
 
         while True:
-            #self._l.info('starting event loop...')
             self._effect.pre()
 
             for event in self._event_queue.pop_event(1000):
-                self._l.info('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
+                self._l.debug('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
 
                 if isinstance(event, PedalEvent):
                     if event.is_pressed:
@@ -145,17 +143,15 @@ class LEDManager(object):
                     # translate the note number to led number
                     led_index = self._calculate_led_index(event)
                     if event.is_pressed:
-                        self._l.info('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                        self._l.debug('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
                         self._effect.key_on(led_index, self._adjust_brightness(event, self._color_scheme.get_color(event)))
                     else:
-                        self._l.info('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                        self._l.debug('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
                         self._effect.key_off(led_index, (0, 0, 0))
 
-            #self._l.info('ending event loop...')
             self._effect.post()
 
             if self._effect.changed():
-                self._l.info('showing led...')
                 self._pixelstrip.show()
 
         self._l.info('ending led visualizer...')

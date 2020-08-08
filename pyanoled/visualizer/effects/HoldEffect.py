@@ -1,6 +1,7 @@
 from pyanoled.visualizer.effects.Effect import Effect
 
 from logging import Logger
+from pyhocon import ConfigTree
 from rpi_ws281x.rpi_ws281x import Color
 from typing import Tuple
 
@@ -9,8 +10,8 @@ class HoldEffect(Effect):
     """
     light effect that leave led lit when pedal is pressed
     """
-    def __init__(self, l: Logger):
-        Effect.__init__(self, l)
+    def __init__(self, l: Logger,  c: ConfigTree):
+        Effect.__init__(self, l, c)
 
         # tracks state of pedal press
         self._pedal = False
@@ -38,16 +39,16 @@ class HoldEffect(Effect):
         self._changed = True
 
     def key_on(self, led_index: int, color: Tuple) -> None:
-        self._l.info('lighting up led {l}'.format(l=led_index))
+        self._l.debug('lighting up led {l}'.format(l=led_index))
         self._pixelstrip.setPixelColor(led_index, Color(*color))
         self._changed = True
 
     def key_off(self, led_index: int, color: Tuple) -> None:
         if self._pedal:
             # pedal is pressed so keep led on as held state
-            self._l.info('holding led {l}'.format(l=led_index))
+            self._l.debug('holding led {l}'.format(l=led_index))
             self._leds[str(led_index)] = self._pixelstrip.getPixelColor(led_index)
         else:
-            self._l.info('shutting down led {l}'.format(l=led_index))
+            self._l.debug('shutting down led {l}'.format(l=led_index))
             self._pixelstrip.setPixelColor(led_index, Color(0, 0, 0))
         self._changed = True

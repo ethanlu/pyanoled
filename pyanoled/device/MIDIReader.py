@@ -34,10 +34,10 @@ class MIDIReader(object):
             pending = []
             for m in self._input_port.iter_pending():
                 if m.type == 'note_on' and KeyEvent.MIN_NOTE <= m.note <= KeyEvent.MAX_NOTE:
-                    self._l.info('key event : {s}'.format(s=str(vars(m))))
+                    self._l.debug('key event : {s}'.format(s=str(vars(m))))
                     pending.append(KeyEvent(m))
                 elif m.type == 'control_change' and m.control == PedalEvent.PEDAL_VAL:
-                    self._l.info('pedal event : {s}'.format(s=str(vars(m))))
+                    self._l.debug('pedal event : {s}'.format(s=str(vars(m))))
                     pending.append(PedalEvent(m))
 
             # append events to queue...rinse and repeat

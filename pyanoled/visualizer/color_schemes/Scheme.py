@@ -2,6 +2,7 @@ from pyanoled.event.Events import KeyEvent
 
 from abc import ABC, abstractmethod
 from logging import Logger
+from pyhocon import ConfigTree
 from typing import Tuple
 
 class Scheme(ABC):
@@ -12,8 +13,9 @@ class Scheme(ABC):
     MIN_VAL = 0
     MAX_VAL = 255
 
-    def __init__(self, l: Logger):
+    def __init__(self, l: Logger, c: ConfigTree):
         self._l = l
+        self._c = c
 
     @abstractmethod
     def get_color(self, key: KeyEvent) -> Tuple:

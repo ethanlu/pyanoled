@@ -21,11 +21,11 @@ class LightEffect(Effect):
         pass
 
     def key_on(self, led_index: int, color: Tuple) -> None:
-        self._l.info('lighting up led {l}'.format(l=led_index))
+        self._l.debug('lighting up led {l}'.format(l=led_index))
         self._pixelstrip.setPixelColor(led_index, Color(*color))
         self._changed = True
 
     def key_off(self, led_index: int, color: Tuple) -> None:
-        self._l.info('shutting down led {l}'.format(l=led_index))
+        self._l.debug('shutting down led {l}'.format(l=led_index))
         self._pixelstrip.setPixelColor(led_index, Color(*color))
         self._changed = True
