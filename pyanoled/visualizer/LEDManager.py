@@ -129,9 +129,10 @@ class LEDManager(object):
         self._l.info('starting led visualizer...')
 
         while True:
-            led_updated = False
+            #self._l.info('starting event loop...')
+            self._effect.pre()
+
             for event in self._event_queue.pop_event(1000):
-                led_updated = True
                 self._l.info('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
 
                 if isinstance(event, PedalEvent):
@@ -145,13 +146,16 @@ class LEDManager(object):
                     led_index = self._calculate_led_index(event)
                     if event.is_pressed:
                         self._l.info('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._effect.key_on(led_index, Color(*self._adjust_brightness(event, self._color_scheme.get_color(event))))
+                        self._effect.key_on(led_index, self._adjust_brightness(event, self._color_scheme.get_color(event)))
                     else:
                         self._l.info('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._effect.key_off(led_index, Color(0, 0, 0))
+                        self._effect.key_off(led_index, (0, 0, 0))
 
-            if led_updated:
-                self._l.info('updating led...')
+            #self._l.info('ending event loop...')
+            self._effect.post()
+
+            if self._effect.changed():
+                self._l.info('showing led...')
                 self._pixelstrip.show()
 
         self._l.info('ending led visualizer...')
