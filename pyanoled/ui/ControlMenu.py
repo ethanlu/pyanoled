@@ -4,7 +4,7 @@ from logging import Logger
 from pyhocon import ConfigTree
 
 
-class LCDApp(object):
+class ControlMenu(object):
     def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
         self._l = l
         self._c = c

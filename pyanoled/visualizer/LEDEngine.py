@@ -12,7 +12,7 @@ import importlib
 import math
 
 
-class LEDManager(object):
+class LEDEngine(object):
     def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
         self._l = l
         self._c = c

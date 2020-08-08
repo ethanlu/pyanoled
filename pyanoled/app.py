@@ -1,7 +1,7 @@
 from pyanoled.device.MIDIReader import MIDIReader
 from pyanoled.event.EventQueue import EventQueue
-from pyanoled.ui.LCDApp import LCDApp
-from pyanoled.visualizer.LEDManager import LEDManager
+from pyanoled.ui.ControlMenu import ControlMenu
+from pyanoled.visualizer.LEDEngine import LEDEngine
 
 from logging import config, getLogger, Logger
 from pyhocon import ConfigFactory, ConfigTree
@@ -19,12 +19,12 @@ class PyanoLED(object):
 
         event_queue = EventQueue()
 
-        lcd_thread = LCDApp(self._l, self._c['lcd'], event_queue)
-        led_thread = LEDManager(self._l, self._c['led'], event_queue)
-        midi_thread = MIDIReader(self._l, self._c['midi'], event_queue)
+        ui_thread = ControlMenu(getLogger('ui'), self._c['ui'], event_queue)
+        visualizer_thread = LEDEngine(getLogger('visualizer'), self._c['visualizer'], event_queue)
+        midi_thread = MIDIReader(getLogger('midi'), self._c['midi'], event_queue)
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            executor.submit(lcd_thread.run)
-            executor.submit(led_thread.run)
+            executor.submit(ui_thread.run)
+            executor.submit(visualizer_thread.run)
             executor.submit(midi_thread.run)
 
         self._l.info('================================== PYANOLED END ==================================')
