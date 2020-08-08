@@ -9,7 +9,7 @@ class DividedScheme(Scheme):
     divided into two colors
     """
 
-    def getColor(self, key: KeyEvent) -> Tuple:
+    def get_color(self, key: KeyEvent) -> Tuple:
         if key.note < 60:
             return (255, 0, 0)
         else:

@@ -10,5 +10,5 @@ class ChaosScheme(Scheme):
     random colors every time
     """
 
-    def getColor(self, key: KeyEvent) -> Tuple:
+    def get_color(self, key: KeyEvent) -> Tuple:
         return (randint(0, 255), randint(0, 255), randint(0, 255))

@@ -9,5 +9,5 @@ class MonoScheme(Scheme):
     one color for all keys
     """
 
-    def getColor(self, key: KeyEvent) -> Tuple:
+    def get_color(self, key: KeyEvent) -> Tuple:
         return (255, 255, 255)

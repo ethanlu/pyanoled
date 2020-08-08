@@ -9,7 +9,7 @@ class KeyScheme(Scheme):
     two colors mapped to black and white keys
     """
 
-    def getColor(self, key: KeyEvent) -> Tuple:
+    def get_color(self, key: KeyEvent) -> Tuple:
         if key.normalized_note < 3:
             # first 3 keys sequenced as:
             # white-black-white

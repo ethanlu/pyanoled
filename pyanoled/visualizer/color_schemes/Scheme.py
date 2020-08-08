@@ -16,7 +16,7 @@ class Scheme(ABC):
         self._l = l
 
     @abstractmethod
-    def getColor(self, key: KeyEvent) -> Tuple:
+    def get_color(self, key: KeyEvent) -> Tuple:
         """
         based on its color scheme design and given key event, generate the appropriate color instance
         :param key: KeyEvent instance

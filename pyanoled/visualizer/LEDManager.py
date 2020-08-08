@@ -1,6 +1,7 @@
 from pyanoled.event.EventQueue import EventQueue
 from pyanoled.event.Events import KeyEvent, PedalEvent
 from pyanoled.visualizer.color_schemes.Scheme import Scheme
+from pyanoled.visualizer.effects.Effect import Effect
 from pyanoled.visualizer.States import OnState, OffState, HeldState
 
 from logging import Logger
@@ -17,12 +18,8 @@ class LEDManager(object):
         self._l = l
         self._c = c
         self._event_queue = event_queue
-        self._pedal = False
-        self._led_states = [None for i in range(88)]
-        self._color_scheme = self._get_color_scheme(self._c['color_scheme'])
 
         self._l.info('initializing led visualizer...')
-
         self._pixelstrip = PixelStrip(
             self._c['count'],
             self._c['gpio_pin'],
@@ -33,6 +30,13 @@ class LEDManager(object):
             channel=self._c['channel']
         )
         self._pixelstrip.begin()
+
+        self._l.info('loading color scheme...')
+        self._color_scheme = self._get_color_scheme(self._c['color_scheme'])
+
+        self._l.info('loading effect...')
+        self._effect = self._get_effect(self._c['led_effect'])
+        self._effect.set_pixelstrip(self._pixelstrip)
 
     def _get_color_scheme(self, scheme: str) -> Type[Scheme]:
         try:
@@ -45,6 +49,21 @@ class LEDManager(object):
             self._l.info('invalid color scheme [{s}]. using default color scheme!'.format(s=scheme))
             name = 'MonoScheme'
             module = importlib.import_module('pyanoled.visualizer.color_schemes.{s}'.format(s=name))
+
+        clss = getattr(module, name)
+        return clss(self._l)
+
+    def _get_effect(self, effect: str) -> Type[Effect]:
+        try:
+            if not effect.strip():
+                effect = 'Light'
+            name = '{s}Effect'.format(s=effect.strip())
+            self._l.info('loading {s} effect...'.format(s=name))
+            module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
+        except ImportError as e:
+            self._l.info('invalid effect [{s}]. using default effect!'.format(s=effect))
+            name = 'LightEffect'
+            module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
 
         clss = getattr(module, name)
         return clss(self._l)
@@ -110,42 +129,29 @@ class LEDManager(object):
         self._l.info('starting led visualizer...')
 
         while True:
+            led_updated = False
             for event in self._event_queue.pop_event(1000):
+                led_updated = True
                 self._l.info('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
 
                 if isinstance(event, PedalEvent):
-                    self._pedal = event.is_pressed
-
-                    if not self._pedal:
-                        # pedal is lifted, so convert any led that was in held state to off state
-                        for i in range(len(self._led_states)):
-                            if isinstance(self._led_states[i], HeldState):
-                                self._led_states[i] = OffState(self._led_states[i].led_index, self._led_states[i].color)
+                    if event.is_pressed:
+                        self._effect.pedal_on()
+                    else:
+                        self._effect.pedal_off()
 
                 if isinstance(event, KeyEvent):
                     # translate the note number to led number
                     led_index = self._calculate_led_index(event)
                     if event.is_pressed:
-                        self._l.info('lighting up led {l} for note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._led_states[i] = OnState(led_index, self._adjust_brightness(event, self._color_scheme.getColor(event)))
+                        self._l.info('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                        self._effect.key_on(led_index, Color(*self._adjust_brightness(event, self._color_scheme.get_color(event))))
                     else:
-                        if self._pedal and isinstance(self._led_states[i], OnState):
-                            # pedal is pressed so keep led on as held state
-                            self._l.info('holding led {l}'.format(l=led_index))
-                            self._led_states[i] = HeldState(led_index, self._led_states[i].color)
-                        else:
-                            self._l.info('shutting down led {l}'.format(l=led_index))
-                            self._led_states[i] = OffState(led_index, (0, 0, 0))
+                        self._l.info('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                        self._effect.key_off(led_index, Color(0, 0, 0))
 
-            # self._pixelstrip.setPixelColor(led_index, Color(*self._adjust_brightness(event, self._color_scheme.getColor(event))))
-            for i in range(len(self._led_states)):
-                if self._led_states[i] is None:
-                    continue
-                else:
-                    self._pixelstrip.setPixelColor(self._led_states[i].led_index, Color(*self._led_states[i].color))
-                    if isinstance(self._led_states[i], OffState):
-                        self._led_states[i] = None
-
-            self._pixelstrip.show()
+            if led_updated:
+                self._l.info('updating led...')
+                self._pixelstrip.show()
 
         self._l.info('ending led visualizer...')
