@@ -90,7 +90,7 @@ class LEDEngine(object):
             return flat_offset + octave_offset + key_offset
         else:
             # last key so use last led
-            return self._c['count'] - 1
+            return self._c['strip.count'] - 1
 
     def _adjust_brightness(self, event: KeyEvent, color: Tuple) -> Tuple:
         """
