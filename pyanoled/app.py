@@ -19,7 +19,7 @@ class PyanoLED(object):
 
         event_queue = EventQueue()
 
-        ui_thread = ControlMenu(getLogger('ui'), self._c['ui'], event_queue)
+        ui_thread = ControlMenu(getLogger('ui'), self._c['ui'])
         visualizer_thread = LEDEngine(getLogger('visualizer'), self._c['visualizer'], event_queue)
         midi_thread = MIDIReader(getLogger('midi'), self._c['midi'], event_queue)
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
