@@ -1,4 +1,4 @@
-from pyanoled.ui.display.Display import Display
+from pyanoled.ui.displays.Display import Display
 from pyanoled.ui.menu import menu
 
 from logging import Logger
@@ -14,20 +14,20 @@ class ControlMenu(object):
         self._l = l
         self._c = c
 
-        self._l.info('initializing display...')
-        self._display = self._get_display(c['display'])
+        self._l.info('initializing displays...')
+        self._display = self._get_display(c['displays'])
 
     def _get_display(self, display: str) -> Type[Display]:
         try:
             if not display.strip():
                 scheme = 'Waveshare144'
             name = '{s}Display'.format(s=display.strip())
-            self._l.info('loading {s} display...'.format(s=name))
-            module = importlib.import_module('pyanoled.ui.display.{s}'.format(s=name))
+            self._l.info('loading {s} displays...'.format(s=name))
+            module = importlib.import_module('pyanoled.ui.displays.{s}'.format(s=name))
         except ImportError as e:
-            self._l.warning('invalid display [{s}]. using default display!'.format(s=scheme))
+            self._l.warning('invalid displays [{s}]. using default displays!'.format(s=scheme))
             name = 'Waveshare144'
-            module = importlib.import_module('pyanoled.ui.display.{s}'.format(s=name))
+            module = importlib.import_module('pyanoled.ui.displays.{s}'.format(s=name))
 
         clss = getattr(module, name)
         return clss(self._l, menu)

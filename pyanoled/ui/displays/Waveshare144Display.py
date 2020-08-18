@@ -1,5 +1,5 @@
-from pyanoled.ui.display.Display import Display
-from pyanoled.ui.display import LCD_1in44, LCD_Config
+from pyanoled.ui.displays.Display import Display
+from pyanoled.ui.displays import LCD_1in44, LCD_Config
 
 from PIL import Image
 

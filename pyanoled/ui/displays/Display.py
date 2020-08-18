@@ -5,7 +5,7 @@ from typing import Dict
 
 class Display(ABC):
     """
-    base abstract class defining the interface that all display class implement
+    base abstract class defining the interface that all displays class implement
     """
 
     def __init__(self, l: Logger, m:Dict):

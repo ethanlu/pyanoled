@@ -187,7 +187,7 @@ class LCD:
 		self.LCD_WriteData_8bit(0x05)
 
 	#********************************************************************************
-	#function:	Set the display scan and color transfer modes
+	#function:	Set the displays scan and color transfer modes
 	#parameter: 
 	#		Scan_dir   :   Scan direction
 	#		Colorchose :   RGB or GBR color format
@@ -252,7 +252,7 @@ class LCD:
 		#Set the initialization register
 		self.LCD_InitReg()
 		
-		#Set the display scan and color transfer modes	
+		#Set the displays scan and color transfer modes
 		self.LCD_SetGramScanWay(Lcd_ScanDir)
 		LCD_Config.Driver_Delay_ms(200)
 		
@@ -260,11 +260,11 @@ class LCD:
 		self.LCD_WriteReg(0x11)
 		LCD_Config.Driver_Delay_ms(120)
 		
-		#Turn on the LCD display
+		#Turn on the LCD displays
 		self.LCD_WriteReg(0x29)
 		
 	#/********************************************************************************
-	#function:	Sets the start position and size of the display area
+	#function:	Sets the start position and size of the displays area
 	#parameter: 
 	#	Xstart 	:   X direction Start coordinates
 	#	Ystart  :   Y direction Start coordinates
@@ -301,7 +301,7 @@ class LCD:
 			return
 		imwidth, imheight = Image.size
 		if imwidth != self.width or imheight != self.height:
-			raise ValueError('Image must be same dimensions as display \
+			raise ValueError('Image must be same dimensions as displays \
 				({0}x{1}).' .format(self.width, self.height))
 		img = np.asarray(Image)
 		pix = np.zeros((self.width,self.height,2), dtype = np.uint8)
