@@ -1,6 +1,9 @@
 from pyanoled.ui.displays.Display import Display
 from pyanoled.ui.displays import LCD_1in44, LCD_Config
 
+from logging import Logger
+from typing import Dict
+
 from PIL import Image
 
 
@@ -8,19 +11,28 @@ class Waveshare144Display(Display):
     """
     https://www.waveshare.com/wiki/File:1.44inch-LCD-HAT-All-Code.7z
     """
-    def __init__(self):
+    def __init__(self, l: Logger):
+        Display.__init__(self, l)
         self._lcd = LCD_1in44.LCD()
         self._lcd_scandir = LCD_1in44.SCAN_DIR_DFT
         self._lcd.LCD_Init(self._lcd_scandir)
         self._lcd.LCD_Clear()
 
     @property
-    def width(self):
+    def width(self) -> int:
         return 128
 
     @property
-    def height(self):
+    def height(self) -> int:
         return 128
+
+    @property
+    def character_width(self) -> int:
+        return 22
+
+    @property
+    def character_height(self) -> int:
+        return 12
 
     def show(self, i: Image) -> None:
         self._lcd.LCD_ShowImage(i, 0, 0)

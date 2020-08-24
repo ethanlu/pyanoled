@@ -10,7 +10,11 @@ from typing import Type, Tuple
 
 import importlib
 import math
+import time
 
+
+DEFAULT_COLOR_SCHEME = 'Mono'
+DEFAULT_EFFECT = 'Light'
 
 class LEDEngine(object):
     def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
@@ -40,13 +44,13 @@ class LEDEngine(object):
     def _get_color_scheme(self, scheme: str) -> Type[Scheme]:
         try:
             if not scheme.strip():
-                scheme = 'Mono'
+                scheme = DEFAULT_COLOR_SCHEME
             name = '{s}Scheme'.format(s=scheme.strip())
             self._l.info('loading {s} color scheme...'.format(s=name))
             module = importlib.import_module('pyanoled.visualizer.color_schemes.{s}'.format(s=name))
         except ImportError as e:
             self._l.warning('invalid color scheme [{s}]. using default color scheme!'.format(s=scheme))
-            name = 'MonoScheme'
+            name = '{s}Scheme'.format(s=DEFAULT_COLOR_SCHEME)
             module = importlib.import_module('pyanoled.visualizer.color_schemes.{s}'.format(s=name))
 
         clss = getattr(module, name)
@@ -55,13 +59,13 @@ class LEDEngine(object):
     def _get_effect(self, effect: str) -> Type[Effect]:
         try:
             if not effect.strip():
-                effect = 'Light'
+                effect = DEFAULT_EFFECT
             name = '{s}Effect'.format(s=effect.strip())
             self._l.info('loading {s} effect...'.format(s=name))
             module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
         except ImportError as e:
             self._l.warning('invalid effect [{s}]. using default effect!'.format(s=effect))
-            name = 'LightEffect'
+            name = '{s}Effect'.format(s=DEFAULT_EFFECT)
             module = importlib.import_module('pyanoled.visualizer.effects.{s}'.format(s=name))
 
         clss = getattr(module, name)
@@ -117,7 +121,7 @@ class LEDEngine(object):
                 # hard press
                 return color
 
-    def run(self):
+    def run(self) -> None:
         """
         main thread for lighting the led strip. reads events off of the event queue and performs:
         - determine led color
@@ -126,6 +130,13 @@ class LEDEngine(object):
         :return:
         """
         self._l.info('starting led visualizer...')
+        for i in range(self._c['strip.count']):
+            self._pixelstrip.setPixelColor(i, Color(255, 255, 255))
+            self._pixelstrip.show()
+            time.sleep(.01)
+        for i in range(self._c['strip.count']):
+            self._pixelstrip.setPixelColor(i, Color(0, 0, 0))
+        self._pixelstrip.show()
 
         while True:
             self._effect.pre()
@@ -155,3 +166,6 @@ class LEDEngine(object):
                 self._pixelstrip.show()
 
         self._l.info('ending led visualizer...')
+        for i in range(self._c['strip.count']):
+            self._pixelstrip.setPixelColor(i, Color(0, 0, 0))
+        self._pixelstrip.show()

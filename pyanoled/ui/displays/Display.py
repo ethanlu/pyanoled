@@ -8,18 +8,27 @@ class Display(ABC):
     base abstract class defining the interface that all displays class implement
     """
 
-    def __init__(self, l: Logger, m:Dict):
+    def __init__(self, l: Logger):
         self._l = l
-        self._m = m
 
     @property
     @abstractmethod
-    def width(self):
+    def width(self) -> int:
         pass
 
     @property
     @abstractmethod
-    def height(self):
+    def height(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def character_width(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def character_height(self) -> int:
         pass
 
     @abstractmethod

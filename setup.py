@@ -25,6 +25,7 @@ setup(
     install_requires=[
         "argparse",
         "mido",
+        "numpy",
         "Pillow",
         "psutil",
         "pyhocon",

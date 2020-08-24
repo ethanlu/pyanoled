@@ -25,7 +25,7 @@
  # THE SOFTWARE.
  #
 
-import LCD_Config
+from pyanoled.ui.displays import LCD_Config
 import RPi.GPIO as GPIO
 import time
 import numpy as np
