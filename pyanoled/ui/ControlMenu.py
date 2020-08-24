@@ -7,6 +7,7 @@ from pyhocon import ConfigTree
 from typing import Type
 
 import importlib
+import RPi.GPIO as GPIO
 import time
 
 
@@ -20,6 +21,35 @@ class ControlMenu(object):
         self._l.info('initializing displays...')
         self._display = self._get_display(c['display'])
         self._menu = Menu(self._l, self._display)
+
+        # key press to channel #
+        self._dpad_up = 6
+        self._dpad_down = 19
+        self._dpad_left = 5
+        self._dpad_right = 26
+        self._dpad_press = 13
+        self._button_a = 21
+        self._button_b = 20
+        self._button_c = 16
+
+        # init gpio
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self._dpad_up, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._dpad_down, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._dpad_left, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._dpad_right, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._dpad_press, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._button_a, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._button_b, GPIO.IN, GPIO.PUD_UP)
+        GPIO.setup(self._button_c, GPIO.IN, GPIO.PUD_UP)
+        GPIO.add_event_detect(self._dpad_up, GPIO.RISING)
+        GPIO.add_event_detect(self._dpad_down, GPIO.RISING)
+        GPIO.add_event_detect(self._dpad_left, GPIO.RISING)
+        GPIO.add_event_detect(self._dpad_right, GPIO.RISING)
+        GPIO.add_event_detect(self._dpad_press, GPIO.RISING)
+        GPIO.add_event_detect(self._button_a, GPIO.RISING)
+        GPIO.add_event_detect(self._button_b, GPIO.RISING)
+        GPIO.add_event_detect(self._button_c, GPIO.RISING)
 
     def _get_display(self, display: str) -> Type[Display]:
         try:
@@ -40,14 +70,48 @@ class ControlMenu(object):
         self._l.info('starting control menu...')
         image = Image.new('RGB', (self._display.height, self._display.width), (0, 0, 0))
         draw = ImageDraw.Draw(image)
-        draw.text((40, 60), 'PYANOLED', fill=(255, 255, 255))
+        draw.text(
+            (
+                round(self._display.width/2) - 24,
+                round(self._display.height/2) - round(self._display.character_height/2)
+            ),
+            'PYANOLED', fill=(255, 255, 255))
         self._display.show(image)
-        time.sleep(3)
+        time.sleep(2)
 
         self._menu.show()
 
         while True:
-            time.sleep(60)
+            if GPIO.event_detected(self._dpad_up):
+                self._l.debug('dpad up pressed')
+                self._menu.up()
+                self._menu.show()
+                pass
+            if GPIO.event_detected(self._dpad_down):
+                self._l.debug('dpad down pressed')
+                self._menu.down()
+                self._menu.show()
+                pass
+            if GPIO.event_detected(self._dpad_left):
+                self._l.debug('dpad left pressed')
+                pass
+            if GPIO.event_detected(self._dpad_right):
+                self._l.debug('dpad right pressed')
+                pass
+            if GPIO.event_detected(self._dpad_press):
+                self._l.debug('dpad pressed')
+                pass
+            if GPIO.event_detected(self._button_a):
+                self._l.debug('button a pressed')
+                pass
+            if GPIO.event_detected(self._button_b):
+                self._l.debug('button b pressed')
+                pass
+            if GPIO.event_detected(self._button_c):
+                self._l.debug('button c pressed')
+                pass
+
+            time.sleep(.01)
 
         self._l.info('ending control menu...')
         self._display.clear()

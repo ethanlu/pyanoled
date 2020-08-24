@@ -116,6 +116,19 @@ class Menu(object):
 
         return lines
 
+    def up(self) -> None:
+        if self._position == 0:
+            # wrap around to last item
+            self._position = len(self._get_menu_items()) - 1
+        else:
+            self._position -= 1
+
+    def down(self) -> None:
+        if self._position == len(self._get_menu_items()) - 1:
+            self._position = 0
+        else:
+            self._position += 1
+
     def show(self) -> None:
         """
         draw menu based on current path and selection
