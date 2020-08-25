@@ -1,16 +1,19 @@
 from pyanoled.event.Events import KeyEvent, PedalEvent
 from pyanoled.event.EventQueue import EventQueue
+from pyanoled.StateControl import StateControl
 
 from logging import Logger
 from pyhocon import ConfigTree
 
 import mido
+import sys
 
 
 class MIDIReader(object):
-    def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
+    def __init__(self, l: Logger, c: ConfigTree, state: StateControl, event_queue: EventQueue):
         self._l = l
         self._c = c
+        self._state = state
         self._event_queue = event_queue
 
         self._l.info('initializing midi listener...')
@@ -29,18 +32,24 @@ class MIDIReader(object):
         """
         self._l.info('starting midi listener...')
 
-        while True:
-            # listen on input port for messages and extract out the pertinent ones
-            pending = []
-            for m in self._input_port.iter_pending():
-                if m.type == 'note_on' and KeyEvent.MIN_NOTE <= m.note <= KeyEvent.MAX_NOTE:
-                    self._l.debug('key event : {s}'.format(s=str(vars(m))))
-                    pending.append(KeyEvent(m))
-                elif m.type == 'control_change' and m.control == PedalEvent.PEDAL_VAL:
-                    self._l.debug('pedal event : {s}'.format(s=str(vars(m))))
-                    pending.append(PedalEvent(m))
+        try:
+            while self._state.is_on():
+                # listen on input port for messages and extract out the pertinent ones
+                pending = []
+                for m in self._input_port.iter_pending():
+                    if m.type == 'note_on' and KeyEvent.MIN_NOTE <= m.note <= KeyEvent.MAX_NOTE:
+                        self._l.debug('key event : {s}'.format(s=str(vars(m))))
+                        pending.append(KeyEvent(m))
+                    elif m.type == 'control_change' and m.control == PedalEvent.PEDAL_VAL:
+                        self._l.debug('pedal event : {s}'.format(s=str(vars(m))))
+                        pending.append(PedalEvent(m))
 
-            # append events to queue...rinse and repeat
-            if len(pending):
-                self._event_queue.push_event(pending)
+                # append events to queue...rinse and repeat
+                if len(pending):
+                    self._event_queue.push_event(pending)
+        except:
+            self._l.exception('midi reader error!')
+            self._state.error()
+
         self._l.info('ending midi listener...')
+        self._input_port.close()

@@ -1,5 +1,6 @@
 from pyanoled.event.EventQueue import EventQueue
 from pyanoled.event.Events import KeyEvent, PedalEvent
+from pyanoled.StateControl import StateControl
 from pyanoled.visualizer.color_schemes.Scheme import Scheme
 from pyanoled.visualizer.effects.Effect import Effect
 
@@ -17,9 +18,10 @@ DEFAULT_COLOR_SCHEME = 'Mono'
 DEFAULT_EFFECT = 'Light'
 
 class LEDEngine(object):
-    def __init__(self, l: Logger, c: ConfigTree, event_queue: EventQueue):
+    def __init__(self, l: Logger, c: ConfigTree, state: StateControl,  event_queue: EventQueue):
         self._l = l
         self._c = c
+        self._state = state
         self._event_queue = event_queue
 
         self._l.info('initializing led visualizer...')
@@ -130,40 +132,45 @@ class LEDEngine(object):
         :return:
         """
         self._l.info('starting led visualizer...')
-        for i in range(self._c['strip.count']):
-            self._pixelstrip.setPixelColor(i, Color(255, 255, 255))
-            self._pixelstrip.show()
-            time.sleep(.01)
-        for i in range(self._c['strip.count']):
-            self._pixelstrip.setPixelColor(i, Color(0, 0, 0))
-        self._pixelstrip.show()
 
-        while True:
-            self._effect.pre()
-
-            for event in self._event_queue.pop_event(1000):
-                self._l.debug('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
-
-                if isinstance(event, PedalEvent):
-                    if event.is_pressed:
-                        self._effect.pedal_on()
-                    else:
-                        self._effect.pedal_off()
-
-                if isinstance(event, KeyEvent):
-                    # translate the note number to led number
-                    led_index = self._calculate_led_index(event)
-                    if event.is_pressed:
-                        self._l.debug('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._effect.key_on(led_index, self._adjust_brightness(event, self._color_scheme.get_color(event)))
-                    else:
-                        self._l.debug('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
-                        self._effect.key_off(led_index, (0, 0, 0))
-
-            self._effect.post()
-
-            if self._effect.changed():
+        try:
+            for i in range(self._c['strip.count']):
+                self._pixelstrip.setPixelColor(i, Color(255, 255, 255))
                 self._pixelstrip.show()
+                time.sleep(.01)
+            for i in range(self._c['strip.count']):
+                self._pixelstrip.setPixelColor(i, Color(0, 0, 0))
+            self._pixelstrip.show()
+
+            while self._state.is_on():
+                self._effect.pre()
+
+                for event in self._event_queue.pop_event(1000):
+                    self._l.debug('processing {n} event : {s}'.format(n=type(event).__name__, s=str(vars(event))))
+
+                    if isinstance(event, PedalEvent):
+                        if event.is_pressed:
+                            self._effect.pedal_on()
+                        else:
+                            self._effect.pedal_off()
+
+                    if isinstance(event, KeyEvent):
+                        # translate the note number to led number
+                        led_index = self._calculate_led_index(event)
+                        if event.is_pressed:
+                            self._l.debug('key pressed for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                            self._effect.key_on(led_index, self._adjust_brightness(event, self._color_scheme.get_color(event)))
+                        else:
+                            self._l.debug('key lifted for led {l} -> note {n}'.format(l=led_index, n=event.normalized_note))
+                            self._effect.key_off(led_index, (0, 0, 0))
+
+                self._effect.post()
+
+                if self._effect.changed():
+                    self._pixelstrip.show()
+        except:
+            self._l.exception('led engine error!')
+            self._state.error()
 
         self._l.info('ending led visualizer...')
         for i in range(self._c['strip.count']):

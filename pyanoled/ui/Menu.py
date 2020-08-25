@@ -1,4 +1,5 @@
 from pyanoled.ui.displays.Display import Display
+from pyanoled.StateControl import StateControl
 
 from logging import Logger
 from PIL import Image, ImageDraw, ImageFont
@@ -70,9 +71,10 @@ DEFAULT_PATH = 'PyanoLED'
 PATH_DELIMITER = '>'
 
 class Menu(object):
-    def __init__(self, l: Logger, d: Type[Display]):
+    def __init__(self, l: Logger, d: Type[Display], state: StateControl):
         self._l = l
         self._display = d
+        self._state = state
         self._path = DEFAULT_PATH
         self._position = 0
         self._image = None
@@ -128,6 +130,10 @@ class Menu(object):
             self._position = 0
         else:
             self._position += 1
+
+    def ok(self) -> None:
+        if self._path == DEFAULT_PATH and self._position == 2:
+            self._state.off()
 
     def show(self) -> None:
         """
