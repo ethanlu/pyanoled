@@ -1,6 +1,6 @@
 from pyanoled.StateControl import StateControl
 from pyanoled.ui.displays.Display import Display
-from pyanoled.ui.Menu import Menu
+from pyanoled.ui.menus.MainMenu import MainMenu
 
 from logging import Logger
 from PIL import Image, ImageDraw
@@ -14,7 +14,7 @@ import time
 
 DEFAULT_DISPLAY = 'Waveshare144'
 
-class ControlMenu(object):
+class ControlApp(object):
     def __init__(self, l: Logger, c: ConfigTree, state: StateControl):
         self._l = l
         self._c = c
@@ -22,7 +22,7 @@ class ControlMenu(object):
 
         self._l.info('initializing displays...')
         self._display = self._get_display(c['display'])
-        self._menu = Menu(self._l, self._display, self._state)
+        self._menu = MainMenu(self._l, self._display, self._state, None)
 
         # key press to channel #
         self._dpad_up = 6
@@ -88,11 +88,11 @@ class ControlMenu(object):
             while self._state.is_on():
                 if GPIO.event_detected(self._dpad_up):
                     self._l.debug('dpad up pressed')
-                    self._menu.up()
+                    self._menu.action_up()
                     self._menu.show()
                 if GPIO.event_detected(self._dpad_down):
                     self._l.debug('dpad down pressed')
-                    self._menu.down()
+                    self._menu.action_down()
                     self._menu.show()
                 if GPIO.event_detected(self._dpad_left):
                     self._l.debug('dpad left pressed')
@@ -105,13 +105,19 @@ class ControlMenu(object):
                     pass
                 if GPIO.event_detected(self._button_a):
                     self._l.debug('button a pressed')
-                    self._menu.ok()
-                    self._menu.show()
+                    m = self._menu.action_confirm()
+                    if m:
+                        self._menu = m
+                        self._menu.show()
                 if GPIO.event_detected(self._button_b):
                     self._l.debug('button b pressed')
                     pass
                 if GPIO.event_detected(self._button_c):
                     self._l.debug('button c pressed')
+                    m = self._menu.action_back()
+                    if m:
+                        self._menu = m
+                        self._menu.show()
                     pass
 
                 time.sleep(.01)

@@ -1,7 +1,7 @@
 from pyanoled.device.MIDIReader import MIDIReader
 from pyanoled.event.EventQueue import EventQueue
 from pyanoled.StateControl import StateControl
-from pyanoled.ui.ControlMenu import ControlMenu
+from pyanoled.ui.ControlApp import ControlApp
 from pyanoled.visualizer.LEDEngine import LEDEngine
 
 from logging import config, getLogger, Logger
@@ -23,7 +23,7 @@ class PyanoLED(object):
         state = StateControl()
 
         while state.is_on() or state.is_reload():
-            ui_thread = ControlMenu(getLogger('ui'), self._c['ui'], state)
+            ui_thread = ControlApp(getLogger('ui'), self._c['ui'], state)
             visualizer_thread = LEDEngine(getLogger('visualizer'), self._c['visualizer'], state, event_queue)
             midi_thread = MIDIReader(getLogger('midi'), self._c['midi'], state, event_queue)
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
