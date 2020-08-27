@@ -23,6 +23,10 @@ class PyanoLED(object):
         state = State()
 
         while state.is_on() or state.is_reload():
+            if state.is_reload():
+                self._l.info('reloading pyanled...')
+                state.on()
+
             ui_thread = ControlApp(getLogger('ui'), self._c, state)
             visualizer_thread = LEDEngine(getLogger('visualizer'), self._c, state, event_queue)
             midi_thread = MIDIReader(getLogger('midi'), self._c, state, event_queue)

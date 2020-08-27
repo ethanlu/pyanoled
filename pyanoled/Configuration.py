@@ -8,7 +8,8 @@ class Configuration(object):
         self._c = ConfigFactory.parse_file(self._file)
         self._m = {}
 
-    def log_configuration(self) -> Dict:
+    @property
+    def log_configuration(self) -> ConfigTree:
         return self._c['log']
 
     def get(self, key: str) -> Any:

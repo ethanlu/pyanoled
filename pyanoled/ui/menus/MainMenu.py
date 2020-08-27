@@ -17,8 +17,8 @@ class MainMenu(Menu):
         self._title = 'PyanoLED'
         self._description = ''
         self._selections = (
-            ColorSchemeMenu(self._l, self._display, self._state, self),
-            EffectMenu(self._l, self._display, self._state, self),
+            ColorSchemeMenu(self._l, self._c, self._display, self._state, self),
+            EffectMenu(self._l, self._c, self._display, self._state, self),
             SelectionItem('Power', 'Power options for PyanoLED'),
         )
 
