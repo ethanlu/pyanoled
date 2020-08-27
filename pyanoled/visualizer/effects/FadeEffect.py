@@ -1,7 +1,7 @@
+from pyanoled.Configuration import Configuration
 from pyanoled.visualizer.effects.Effect import Effect
 
 from logging import Logger
-from pyhocon import ConfigTree
 from rpi_ws281x.rpi_ws281x import Color
 from typing import Tuple
 
@@ -12,7 +12,7 @@ class FadeEffect(Effect):
     """
     light effect that does not turn led off immediately on key lift but fades it to 0
     """
-    def __init__(self, l: Logger, c: ConfigTree):
+    def __init__(self, l: Logger, c: Configuration):
         Effect.__init__(self, l, c)
 
         # tracks leds that are fading

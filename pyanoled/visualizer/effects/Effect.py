@@ -1,6 +1,7 @@
+from pyanoled.Configuration import Configuration
+
 from abc import ABC, abstractmethod
 from logging import Logger
-from pyhocon import ConfigTree
 from rpi_ws281x.rpi_ws281x import Color, PixelStrip
 from typing import Tuple
 
@@ -9,7 +10,7 @@ class Effect(ABC):
     base abstract class defining the interface that all effect scheme subclasses needs to implement
     """
 
-    def __init__(self, l: Logger, c: ConfigTree):
+    def __init__(self, l: Logger, c: Configuration):
         self._l = l
         self._c = c
         self._changed = False

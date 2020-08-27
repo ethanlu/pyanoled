@@ -1,17 +1,18 @@
+from pyanoled.Configuration import Configuration
 from pyanoled.ui.displays.Display import Display
 from pyanoled.ui.menus.Menu import Menu
 from pyanoled.ui.menus.ColorSchemeMenu import ColorSchemeMenu
 from pyanoled.ui.menus.EffectMenu import EffectMenu
 from pyanoled.ui.menus.SelectionItem import SelectionItem
-from pyanoled.StateControl import StateControl
+from pyanoled.State import State
 
 from logging import Logger
 from typing import Optional, Type
 
 
 class MainMenu(Menu):
-    def __init__(self, l: Logger, d: Type[Display], state: StateControl, parent:Optional[Type[Menu]]):
-        super().__init__(l, d, state, parent)
+    def __init__(self, l: Logger, c: Configuration, d: Type[Display], state: State, parent:Optional[Type[Menu]]):
+        super().__init__(l, c, d, state, parent)
 
         self._title = 'PyanoLED'
         self._description = ''
@@ -26,6 +27,7 @@ class MainMenu(Menu):
         if isinstance(item, Menu):
             return item
         elif item.title == 'Power':
+            self._l.info('shutting down')
             self._state.off()
             return None
         else:

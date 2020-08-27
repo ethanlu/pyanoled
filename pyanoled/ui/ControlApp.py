@@ -1,10 +1,10 @@
-from pyanoled.StateControl import StateControl
+from pyanoled.Configuration import Configuration
+from pyanoled.State import State
 from pyanoled.ui.displays.Display import Display
 from pyanoled.ui.menus.MainMenu import MainMenu
 
 from logging import Logger
 from PIL import Image, ImageDraw
-from pyhocon import ConfigTree
 from typing import Type
 
 import importlib
@@ -15,14 +15,14 @@ import time
 DEFAULT_DISPLAY = 'Waveshare144'
 
 class ControlApp(object):
-    def __init__(self, l: Logger, c: ConfigTree, state: StateControl):
+    def __init__(self, l: Logger, c: Configuration, state: State):
         self._l = l
         self._c = c
         self._state = state
 
         self._l.info('initializing displays...')
-        self._display = self._get_display(c['display'])
-        self._menu = MainMenu(self._l, self._display, self._state, None)
+        self._display = self._get_display(self._c.get('ui.display'))
+        self._menu = MainMenu(self._l, self._c, self._display, self._state, None)
 
         # key press to channel #
         self._dpad_up = 6

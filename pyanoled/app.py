@@ -1,18 +1,18 @@
+from pyanoled.Configuration import Configuration
 from pyanoled.device.MIDIReader import MIDIReader
 from pyanoled.event.EventQueue import EventQueue
-from pyanoled.StateControl import StateControl
+from pyanoled.State import State
 from pyanoled.ui.ControlApp import ControlApp
 from pyanoled.visualizer.LEDEngine import LEDEngine
 
 from logging import config, getLogger, Logger
-from pyhocon import ConfigFactory, ConfigTree
 from subprocess import call
 
 import concurrent.futures
 
 
 class PyanoLED(object):
-    def __init__(self, l: Logger, c: ConfigTree):
+    def __init__(self, l: Logger, c: Configuration):
         self._l = l
         self._c = c
 
@@ -20,12 +20,12 @@ class PyanoLED(object):
         self._l.info('================================== PYANOLED START ==================================')
 
         event_queue = EventQueue()
-        state = StateControl()
+        state = State()
 
         while state.is_on() or state.is_reload():
-            ui_thread = ControlApp(getLogger('ui'), self._c['ui'], state)
-            visualizer_thread = LEDEngine(getLogger('visualizer'), self._c['visualizer'], state, event_queue)
-            midi_thread = MIDIReader(getLogger('midi'), self._c['midi'], state, event_queue)
+            ui_thread = ControlApp(getLogger('ui'), self._c, state)
+            visualizer_thread = LEDEngine(getLogger('visualizer'), self._c, state, event_queue)
+            midi_thread = MIDIReader(getLogger('midi'), self._c, state, event_queue)
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
                 executor.submit(ui_thread.run)
                 executor.submit(visualizer_thread.run)
@@ -38,8 +38,8 @@ class PyanoLED(object):
 
 
 if __name__ == "__main__":
-    c = ConfigFactory.parse_file('/opt/app/conf/app.conf')
-    config.dictConfig(c['log'])
+    c = Configuration('/opt/app/conf/app.conf')
+    config.dictConfig(c.log_configuration)
 
     app = PyanoLED(getLogger('pyanoled'), c)
     app.run()

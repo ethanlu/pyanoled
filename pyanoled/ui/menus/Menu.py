@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from pyanoled.Configuration import Configuration
 from pyanoled.ui.displays.Display import Display
 from pyanoled.ui.menus.SelectionItem import SelectionItem
-from pyanoled.StateControl import StateControl
+from pyanoled.State import State
 
 from abc import ABC, abstractmethod
 from logging import Logger
@@ -11,15 +12,14 @@ from typing import Optional, Tuple, Type
 
 
 class Menu(ABC, SelectionItem):
-    def __init__(self, l: Logger, d: Type[Display], state: StateControl, parent:Optional[Type[Menu]]):
-        SelectionItem.__init__('', '')
+    def __init__(self, l: Logger, c: Configuration, d: Type[Display], state: State, parent:Optional[Type[Menu]]):
+        SelectionItem.__init__(self, '', '')
 
         self._l = l
+        self._c = c
         self._display = d
         self._state = state
         self._parent = parent
-
-        self._image = Image.new('RGB', (self._display.height, self._display.width), (0, 0, 0))
 
         self._selected = 0
         self._selections = ()
@@ -53,16 +53,14 @@ class Menu(ABC, SelectionItem):
 
         return lines
 
-    def _show_header(self) -> None:
-        draw = ImageDraw.Draw(self._image)
+    def _draw_header(self, draw: ImageDraw) -> None:
         y = 1
         draw.text((1, y), self.title, fill=(255, 255, 255))
         y += self._display.character_height
         draw.line([(0, y), (self._display.width, y)], fill=(255, 255, 255), width=1)
         y += 1
 
-    def _show_footer(self) -> None:
-        draw = ImageDraw.Draw(self._image)
+    def _draw_footer(self, draw: ImageDraw) -> None:
         y = self._display.height - self._display.character_height * 2 - 1
         draw.line([(0, y), (self._display.width, y)], fill=(255, 255, 255), width=1)
         y += 1
@@ -70,10 +68,7 @@ class Menu(ABC, SelectionItem):
             draw.text((1, y), l, fill=(255, 255, 255))
             y += self._display.character_height
 
-        self._display.show(self._image)
-
-    def _show_selections(self) -> None:
-        draw = ImageDraw.Draw(self._image)
+    def _draw_selections(self, draw: ImageDraw) -> None:
         y = 2 + self._display.character_height
         for i, v in enumerate(self._selections):
             # only show items that fit
@@ -136,8 +131,9 @@ class Menu(ABC, SelectionItem):
         draw menu based on current path and selection
         :return:
         """
-        self._show_header()
-        self._show_selections()
-        self._show_footer()
-
-        self._display.show(self._image)
+        image = Image.new('RGB', (self._display.height, self._display.width), (0, 0, 0))
+        draw = ImageDraw.Draw(image)
+        self._draw_header(draw)
+        self._draw_selections(draw)
+        self._draw_footer(draw)
+        self._display.show(image)

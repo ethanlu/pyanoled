@@ -1,16 +1,15 @@
+from pyanoled.Configuration import Configuration
 from pyanoled.event.Events import KeyEvent, PedalEvent
 from pyanoled.event.EventQueue import EventQueue
-from pyanoled.StateControl import StateControl
+from pyanoled.State import State
 
 from logging import Logger
-from pyhocon import ConfigTree
 
 import mido
-import sys
 
 
 class MIDIReader(object):
-    def __init__(self, l: Logger, c: ConfigTree, state: StateControl, event_queue: EventQueue):
+    def __init__(self, l: Logger, c: Configuration, state: State, event_queue: EventQueue):
         self._l = l
         self._c = c
         self._state = state
@@ -19,7 +18,7 @@ class MIDIReader(object):
         self._l.info('initializing midi listener...')
 
         # open input port based on information from config
-        self._input_port = mido.open_input([s for s in mido.get_input_names() if s.startswith(self._c['input_port_prefix'])][0])
+        self._input_port = mido.open_input([s for s in mido.get_input_names() if s.startswith(self._c.get('midi.input_port_prefix'))][0])
 
     def run(self):
         """

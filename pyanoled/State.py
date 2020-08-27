@@ -1,7 +1,7 @@
 from threading import Lock
 
 
-class StateControl(object):
+class State(object):
     STATE_ON = 'on'
     STATE_OFF = 'off'
     STATE_RELOAD = 'reload'
