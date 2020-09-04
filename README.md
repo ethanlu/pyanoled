@@ -58,3 +58,4 @@ The instructions for setting up the Raspberry Pi are pretty straight forward, bu
 - MIDI playback
 - Synthesia support
 - Additional color schemes and effects
+- Additional configuration exposed in UI
