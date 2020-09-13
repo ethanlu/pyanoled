@@ -7,7 +7,7 @@ Piano LED visualizer based in Python 3.x. Inspired by the [onlaj/Piano-LED-Visua
 * [Hardware Setup](#setup)
     * [LED](#led)
     * [Raspberry Pi](#raspberrypi)
-* [Install](#install)
+* [Install/Run](#install-run)
 * [TODO](#todo)
 
 ## Hardware Setup
@@ -38,23 +38,42 @@ The instructions for setting up the Raspberry Pi are pretty straight forward, bu
 4) [Configuring MIDI](https://neuma.studio/rpi-midi-complete.html)
     - Missing Jack module errors: `sudo apt-get install libjack-dev`
     - Python 3 packages: `libatlas-base-dev`
+5) Additional packages that might be needed
+    - `sudo apt-get install libjpeg-dev zlib1g-dev`
 
-## Install
-1. clone project in Raspberry Pi
-2. switch to root and install
+## Install/Run
+1. Setup your virtual environment
     ```shell script
-   # in pyanoled project 
-   python3 setup.py install
+    virtualenv <path to env>
+    source <path to env>/bin/activate
     ```
-3. Run manually
+
+2. Install project from package or source 
+    - To install from pypi:
+        ```shell script
+        # in raspberry pi, install the project from pypi
+        pip3 install pyanoled
+        ```
+
+    - To install from source:
+        ```shell script
+        # in raspberry pi, clone repository
+        git clone <repository>
+        
+        # in project root directory, run setuptools
+        # note: some dependencies (like numpy) can take a long time to install this way. can install those
+        # dependencies through pip first before running this step
+        python3 setup.py develop
+        ```
+3. Run project
     ```shell script
-   python3 pyanoled/app.py
+    # console script setup as entrypoint
+    pyanoled
     ```
-4. Optionally, setup supervisord to run automatically on power on
 
 ## TODO
 - Persist PyanoLED app configuration changes
-- Configure and run PyanoLED via Docker
+- Dockerize PyanoLED
 - MIDI playback
 - Synthesia support
 - Additional color schemes and effects

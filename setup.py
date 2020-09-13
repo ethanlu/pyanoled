@@ -1,6 +1,7 @@
-#!/usr/bin/env python
-
 from setuptools import setup, find_packages
+
+with open('README.md', 'r') as fh:
+    long_description = fh.read()
 
 setup(
     name="pyanoled",
@@ -8,21 +9,20 @@ setup(
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
     description="Python Piano LED Visualizer",
-    keywords="",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/ethanlu/pyanoled",
-    download_url="https://github.com/ethanlu/pyanoled",
     license="MIT",
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python',
         'Programming Language :: Python :: 3'
     ],
+    python_requires='>3.6',
     packages=find_packages(),
-    include_package_data=True,
-    data_files=[],
-    dependency_links=[],
+    package_data={'pyanoled': ['conf/*.conf']},
     install_requires=[
+        "cython",
         "argparse",
         "mido",
         "numpy",
@@ -36,7 +36,9 @@ setup(
         "webcolors",
         "wheel"
     ],
-    tests_require=[],
-    cmdclass={},
-    entry_points={}
+    entry_points={
+        'console_scripts': [
+            'pyanoled = pyanoled.__main__:main'
+        ]
+    }
 )

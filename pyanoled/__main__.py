@@ -1,3 +1,4 @@
+from pyanoled import get_conf_path
 from pyanoled.Configuration import Configuration
 from pyanoled.device.MIDIReader import MIDIReader
 from pyanoled.event.EventQueue import EventQueue
@@ -24,7 +25,7 @@ class PyanoLED(object):
 
         while state.is_on() or state.is_reload():
             if state.is_reload():
-                self._l.info('reloading pyanled...')
+                self._l.info('reloading pyanoled...')
                 state.on()
 
             ui_thread = ControlApp(getLogger('ui'), self._c, state)
@@ -40,10 +41,12 @@ class PyanoLED(object):
         if state.is_off():
             call("sudo shutdown -h now", shell=True)
 
-
-if __name__ == "__main__":
-    c = Configuration('/opt/app/conf/app.conf')
+def main():
+    c = Configuration(get_conf_path('app.conf'))
     config.dictConfig(c.log_configuration)
 
     app = PyanoLED(getLogger('pyanoled'), c)
     app.run()
+
+if __name__ == "__main__":
+    main()
