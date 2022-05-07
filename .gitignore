@@ -128,5 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# hidden files
 .idea
 .DS_Store
+
+# pyanoled
+pyanoled/conf/app.conf
