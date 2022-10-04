@@ -31,9 +31,9 @@ class PyanoLED(object):
             if found and int(found[0][0]) > 0:
                 ports.append((found[0][0], found[0][1]))
 
-        for (p1, p2) in combinations(ports):
-            subprocess.call(f"aconnect {p1[0]}:0 {p2[0]:0}", shell=True)
-            subprocess.call(f"aconnect {p2[0]}:0 {p1[0]:0}", shell=True)
+        for (p1, p2) in combinations(ports, 2):
+            subprocess.call(f"aconnect {p1[0]}:0 {p2[0]}:0", shell=True)
+            subprocess.call(f"aconnect {p2[0]}:0 {p1[0]}:0", shell=True)
 
     def run(self):
         self._l.info('================================== PYANOLED START ==================================')
