@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name="pyanoled",
-    version="1.1.0",
+    version="1.2.0",
     author="Ethan Lu",
     author_email="fang.lu@gmail.com",
     description="Python Piano LED Visualizer",
