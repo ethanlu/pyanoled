@@ -18,7 +18,7 @@ class MIDIReader(object):
         self._l.info('initializing midi listener...')
 
         # open input port based on information from config
-        self._input_port = mido.open_input([s for s in mido.get_input_names() if s.startswith(self._c.get('midi.input_port_prefix'))][0])
+        self._input_port = mido.open_input([s for s in mido.get_input_names() if s.startswith(self._c.get('midi.piano_port_name'))][0])
 
     def run(self):
         """
